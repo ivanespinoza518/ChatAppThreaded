@@ -1,0 +1,21 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Python bytecode files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environment folders
+venv/
+.env/
+
+# PyCharm settings
+.idea/
+
+# IDE-specific configurations
+*.iml
+*.xml
+vcs_xml
