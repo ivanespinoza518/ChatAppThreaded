@@ -6,4 +6,4 @@ class DisplayPortCommand(Command):
         self.port = port
 
     def execute(self):
-        print(f"\nYour port: {self.port}")
+        print(f"\n\tport={self.port}")

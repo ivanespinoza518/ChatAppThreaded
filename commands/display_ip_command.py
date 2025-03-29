@@ -6,4 +6,4 @@ class DisplayIPCommand(Command):
         self.ip = ip
 
     def execute(self):
-        print(f"\nYour IP: {self.ip}")
+        print(f"\n\taddr={self.ip}")
