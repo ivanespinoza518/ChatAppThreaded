@@ -9,20 +9,20 @@ from commands.display_port_command import DisplayPortCommand
 from commands.exit_command import ExitCommand
 from commands.help_command import HelpCommand
 from commands.message_command import MessageCommand
+from core.address import Address
 from peer.peer import Peer
 from utils.user_input import UserInput
 
 
 class UserInterface:
     def __init__(self):
-        self.host = socket.gethostbyname(socket.gethostname())
-        self.port = UserInput.get_available_port()
+        self.address = Address(socket.gethostbyname(socket.gethostname()), UserInput.get_available_port())
         self.username = input("Enter your username: ")
-        self.peer = Peer(self.username, self.host, self.port)
+        self.peer = Peer(self.username, self.address)
         self.commands = {
             "help": HelpCommand(),
-            "ip": DisplayIPCommand(self.host),
-            "port": DisplayPortCommand(self.port),
+            "ip": DisplayIPCommand(self.address.ip),
+            "port": DisplayPortCommand(self.address.port),
             "list": DisplayPeersCommand(self.peer),
             "connect": ConnectCommand(self.peer),
             "disconnect": DisconnectCommand(self.peer),

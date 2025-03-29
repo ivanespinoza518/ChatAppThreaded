@@ -7,9 +7,9 @@ from core.socket_factory import SocketFactory
 
 
 class Peer:
-    def __init__(self, username, host, port):
+    def __init__(self, username: str, address: Address):
         self.username = username
-        self.address = Address(host, port)
+        self.address = Address(address.ip, address.port)
         self.server_socket = SocketFactory.create_server_socket(self.username, self.address)
         self.peers = {}  # Dictionary to track connected peers {username, client)}
         self.lock = threading.Lock()
@@ -30,11 +30,12 @@ class Peer:
             client_socket.send(self.username.encode())
 
             # Add the new peer to the list
-            self.add_peer(username, Client(client_socket, username, Address(ip, port)))
+            client = Client(client_socket, username, Address(ip, port))
+            self.add_peer(username, client)
 
-            threading.Thread(target=self.receive_messages, args=(client_socket,username), daemon=True).start()
+            threading.Thread(target=self.receive_messages, args=(client,), daemon=True).start()
 
-    def add_peer(self, username, client: Client):
+    def add_peer(self, username: str, client: Client):
         """Add a new peer to the list."""
         with self.lock:
             self.peers[username] = client
@@ -51,16 +52,17 @@ class Peer:
             # Receive username of the connected peer
             username = client_socket.recv(1024).decode()
 
-            # Add remote peer to the list
-            self.add_peer(username, Client(client_socket, username, address))
+            # Add client to the list
+            client = Client(client_socket, username, address)
+            self.add_peer(username, client)
 
             # Start receiving messages in the background
-            threading.Thread(target=self.receive_messages, args=(client_socket,username), daemon=True).start()
+            threading.Thread(target=self.receive_messages, args=(client,), daemon=True).start()
 
         except Exception as e:
             print(f"Error connecting to peer: {e}")
 
-    def disconnect_from_peer(self, peer_username):
+    def disconnect_from_peer(self, peer_username: str):
         """Terminate connection to peer."""
         with self.lock:
             if peer_username in self.peers:
@@ -80,36 +82,36 @@ class Peer:
             else:
                 print(f"Peer {peer_username} not found.")
 
-    def receive_messages(self, client_socket, username):
+    def receive_messages(self, client: Client):
         """Handle receiving messages from the peer."""
         try:
             while True:
-                    message = client_socket.recv(1024).decode()
+                    message = client.socket.recv(1024).decode()
                     if not message:
                         break
 
                     if message.startswith("DISCONNECT"):
-                        print(f"\n{username} has disconnected.")
+                        print(f"\n{client.username} has disconnected.")
                         with self.lock:
-                            if username in self.peers:
-                                del self.peers[username]
+                            if client.username in self.peers:
+                                del self.peers[client.username]
                         break
 
-                    print(f"\n{username}: {message}")
+                    print(f"\n{client.username}: {message}")
 
         except socket.error as e:
             if e.errno in [10053, 10054]:
                 with self.lock:
-                    if username in self.peers:
-                        del self.peers[username]
-                print(f"\nDisconnected from {username}.")
+                    if client.username in self.peers:
+                        del self.peers[client.username]
+                print(f"\nDisconnected from {client.username}.")
             else:
                 print(f"\nError receiving message: {e}")
 
         finally:
-            client_socket.close()
+            client.socket.close()
 
-    def send_message(self, message, peer_username):
+    def send_message(self, message: str, peer_username: str):
         """Send a message to a specific peer."""
         client = self.peers.get(peer_username)
         if client:

@@ -2,7 +2,7 @@ from core.address import Address
 
 
 class Client:
-    def __init__(self, socket, username, address: Address):
+    def __init__(self, socket, username: str, address: Address):
         self.socket = socket
         self.username = username
         self.address = address
