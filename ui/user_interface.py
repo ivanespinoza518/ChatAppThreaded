@@ -37,7 +37,7 @@ class UserInterface:
 
     def main_menu(self):
         """Display the main menu and prompt the user for actions."""
-        print("Enter a command. Enter 'help' for list of recognized commands.")
+        print("\nEnter a command. Enter 'help' for list of recognized commands.")
         while True:
             command = input("\nEnter a command: ").strip().split()
             if not command:

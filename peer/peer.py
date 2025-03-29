@@ -10,15 +10,12 @@ class Peer:
     def __init__(self, username, host, port):
         self.username = username
         self.address = Address(host, port)
-        self.server_socket = SocketFactory.create_socket()
+        self.server_socket = SocketFactory.create_server_socket(self.username, self.address)
         self.peers = {}  # Dictionary to track connected peers {username, client)}
         self.lock = threading.Lock()
 
     def start(self):
         """Listen for incoming connections in the background."""
-        self.server_socket.bind((self.address.ip, self.address.port))
-        self.server_socket.listen(5)
-        print(f"{self.username}'s server started on {self.address}")
         threading.Thread(target=self.accept_connections, daemon=True).start()
 
     def accept_connections(self):
@@ -43,11 +40,10 @@ class Peer:
             self.peers[username] = client
             print(f"\nConnected to {username}")
 
-    def connect_to_peer(self, peer_ip, peer_port):
+    def connect_to_peer(self, address: Address):
         """Connect to another peer (client side)."""
         try:
-            client_socket = SocketFactory.create_socket()
-            client_socket.connect((peer_ip, peer_port))
+            client_socket = SocketFactory.create_client_socket(address)
 
             # Send username to the connected peer
             client_socket.send(self.username.encode())
@@ -56,7 +52,7 @@ class Peer:
             username = client_socket.recv(1024).decode()
 
             # Add remote peer to the list
-            self.add_peer(username, Client(client_socket, username, Address(peer_ip, peer_port)))
+            self.add_peer(username, Client(client_socket, username, address))
 
             # Start receiving messages in the background
             threading.Thread(target=self.receive_messages, args=(client_socket,username), daemon=True).start()
@@ -103,6 +99,9 @@ class Peer:
 
         except socket.error as e:
             if e.errno in [10053, 10054]:
+                with self.lock:
+                    if username in self.peers:
+                        del self.peers[username]
                 print(f"\nDisconnected from {username}.")
             else:
                 print(f"\nError receiving message: {e}")
@@ -121,6 +120,6 @@ class Peer:
 
     def display_peers(self):
         """Display a list of connected peers."""
-        print("Connected Peers:")
+        print("\nConnected Peers:")
         for _, client in self.peers.items():
             print(f"\t{client}")

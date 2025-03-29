@@ -1,4 +1,5 @@
 from commands.command import Command
+from core.address import Address
 from peer.peer import Peer
 
 
@@ -12,4 +13,4 @@ class ConnectCommand(Command):
         peer_port = int(input("Enter the port of the peer to connect to: "))
 
         # Connect to the peer
-        self.peer.connect_to_peer(peer_ip, peer_port)
+        self.peer.connect_to_peer(Address(peer_ip, peer_port))
