@@ -34,7 +34,7 @@ This project is a Python-based Peer-to-Peer Chat Application that enables direct
 
 ### Prerequisites
 
-Python 3.x installed
+Python 3.11 installed
 
 ### Installation
 
