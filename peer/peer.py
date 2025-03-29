@@ -16,7 +16,7 @@ class Peer:
 
     def start(self):
         """Listen for incoming connections in the background."""
-        self.server_socket.bind(self.address)
+        self.server_socket.bind((self.address.ip, self.address.port))
         self.server_socket.listen(5)
         print(f"{self.username}'s server started on {self.address}")
         threading.Thread(target=self.accept_connections, daemon=True).start()
@@ -41,7 +41,7 @@ class Peer:
         """Add a new peer to the list."""
         with self.lock:
             self.peers[username] = client
-            print(f"Connected to {username}")
+            print(f"\nConnected to {username}")
 
     def connect_to_peer(self, peer_ip, peer_port):
         """Connect to another peer (client side)."""
@@ -93,19 +93,19 @@ class Peer:
                         break
 
                     if message.startswith("DISCONNECT"):
-                        print(f"{username} has disconnected.")
+                        print(f"\n{username} has disconnected.")
                         with self.lock:
                             if username in self.peers:
                                 del self.peers[username]
                         break
 
-                    print(f"{username}: {message}")
+                    print(f"\n{username}: {message}")
 
         except socket.error as e:
             if e.errno in [10053, 10054]:
-                print(f"{username} disconnected.")
+                print(f"\nDisconnected from {username}.")
             else:
-                print(f"Error receiving message: {e}")
+                print(f"\nError receiving message: {e}")
 
         finally:
             client_socket.close()
@@ -123,4 +123,4 @@ class Peer:
         """Display a list of connected peers."""
         print("Connected Peers:")
         for _, client in self.peers.items():
-            print(f"{client}")
+            print(f"\t{client}")
