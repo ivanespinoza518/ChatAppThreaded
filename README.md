@@ -112,11 +112,13 @@ cd ChatAppThreaded</pre>
 
 ## Potential Future Enhancements
 
-Implement a GUI version.
+Implement logging system.
+
+Implement peer discovery for automatic connection.
 
 Add encryption for secure messaging.
 
-Implement peer discovery for automatic connection.
+Implement a GUI version.
 
 
 ## Author
